@@ -1,0 +1,9 @@
+
+.env
+.ENV
+*.json
+!package.json
+!package-lock.json
+node_modules/
+Thumbs.db
+Desktop.ini
