@@ -13,6 +13,8 @@ app.use(cors());
 // تشغيل عرض ملفات الـ Frontend من فولدر public أوتوماتيكياً
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+
 // 1. الاتصال بقاعدة بيانات MongoDB Atlas باستخدام الـ URI من ملف .env
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB Atlas successfully!'))
