@@ -7,6 +7,6 @@
     "express": "^5.1.0",
     "mongodb": "^7.3.0",
     "mongoose": "^8.19.1",
-    "nodemailer": "^7.0.9"
+    "nodemailer": "^7.0.13"
   }
 }
