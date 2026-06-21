@@ -7,3 +7,9 @@
 node_modules/
 Thumbs.db
 Desktop.ini
+.DS_Store
+logs/
+*.log
+uploads/
+version.txt
+vercel.json
