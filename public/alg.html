@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Workspace & Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #012b1a; /* Matching your deep green style */
+        }
+
+        /* --- THE WRITING PAPER CANVAS --- */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Grid lines pattern to make it look like math graph paper */
+        canvas {
+            display: block;
+            background-color: #fbfdfa;
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(0, 70, 44, 0.06) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 70, 44, 0.06) 1px, transparent 1px);
+            cursor: crosshair;
+        }
+
+        /* Workspace Header Overlay */
+        .workspace-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .workspace-title {
+            background: rgba(1, 43, 26, 0.9);
+            color: #6ad7a8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .clear-btn {
+            background: #9c4141;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .clear-btn:hover { background: #bd4f4f; }
+
+        /* --- FLOATING CALCULATOR ICON (TOP RIGHT) --- */
+        #calc-toggle-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: #194236;
+            color: #6ad7a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid rgba(106, 215, 168, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #calc-toggle-icon:hover {
+            background: #6ad7a8;
+            color: #012b1a;
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* --- SLIDE-IN POPUP CALCULATOR PANEL --- */
+        #calculator-panel {
+            position: absolute;
+            top: 90px;
+            right: -350px; /* Hidden off-screen initially */
+            width: 320px;
+            background: rgba(1, 43, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid #6ad7a8;
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 90;
+            box-shadow: -5px 10px 30px rgba(0,0,0,0.5);
+            transition: right 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        #calculator-panel.open {
+            right: 20px; /* Moves into view */
+        }
+
+        /* Calculator Display Screen */
+        .calc-screen {
+            width: 100%;
+            height: 60px;
+            background: #0d1a15;
+            border: 1px solid rgba(106, 215, 168, 0.3);
+            border-radius: 8px;
+            color: #6ad7a8;
+            text-align: right;
+            padding: 10px;
+            font-size: 1.6rem;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        /* Grid Keys */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: #194236;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #6ad7a8;
+        }
+
+        .calc-btn.operator {
+            color: #6ad7a8;
+            background: #0d261f;
+        }
+
+        .calc-btn.clear {
+            background: #9c4141;
+        }
+        .calc-btn.clear:hover { background: #bd4f4f; }
+
+        .calc-btn.equal {
+            background: #6ad7a8;
+            color: #012b1a;
+            grid-column: span 2;
+        }
+        .calc-btn.equal:hover { background: #8ffbd0; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Left Controls -->
+    <div class="workspace-ui">
+        <div class="workspace-title" id="page-title">📝 Math Scratchpad Workspace</div>
+        <button class="clear-btn" onclick="clearCanvas()">Clear Paper 🗑️</button>
+    </div>
+
+    <!-- Floating Trigger Icon (Top Right) -->
+    <div id="calc-toggle-icon" onclick="toggleCalculator()">🖩</div>
+
+    <!-- Slide-Out Full Calculator Widget Panel -->
+    <div id="calculator-panel">
+        <input type="text" id="calc-display" class="calc-screen" readonly value="0">
+        <div class="calc-grid">
+            <!-- Row 1 -->
+            <button class="calc-btn clear" onclick="pressClear()">C</button>
+            <button class="calc-btn operator" onclick="pressOp('(')">(</button>
+            <button class="calc-btn operator" onclick="pressOp(')')">)</button>
+            <button class="calc-btn operator" onclick="pressOp('/')">÷</button>
+            
+            <!-- Row 2 -->
+            <button class="calc-btn" onclick="pressNum('7')">7</button>
+            <button class="calc-btn" onclick="pressNum('8')">8</button>
+            <button class="calc-btn" onclick="pressNum('9')">9</button>
+            <button class="calc-btn operator" onclick="pressOp('*')">×</button>
+            
+            <!-- Row 3 -->
+            <button class="calc-btn" onclick="pressNum('4')">4</button>
+            <button class="calc-btn" onclick="pressNum('5')">5</button>
+            <button class="calc-btn" onclick="pressNum('6')">6</button>
+            <button class="calc-btn operator" onclick="pressOp('-')">-</button>
+            
+            <!-- Row 4 -->
+            <button class="calc-btn" onclick="pressNum('1')">1</button>
+            <button class="calc-btn" onclick="pressNum('2')">2</button>
+            <button class="calc-btn" onclick="pressNum('3')">3</button>
+            <button class="calc-btn operator" onclick="pressOp('+')">+</button>
+            
+            <!-- Row 5 -->
+            <button class="calc-btn" onclick="pressNum('0')">0</button>
+            <button class="calc-btn" onclick="pressNum('.')">.</button>
+            <button class="calc-btn equal" onclick="pressEqual()">=</button>
+        </div>
+    </div>
+
+    <!-- Infinite Writing Paper Canvas Overlay Layer -->
+    <div id="canvas-container">
+        <canvas id="paintCanvas"></canvas>
+    </div>
+
+    <script>
+        // --- 1. HANDLE DETECTING PAGE MODE FROM URL ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const path = window.location.pathname.toLowerCase();
+            const titleEl = document.getElementById('page-title');
+            if (path.includes('algebra')) {
+                titleEl.innerText = "🧮 Algebra Scratch Workspace";
+            } else if (path.includes('geometry')) {
+                titleEl.innerText = "📐 Geometry Scratch Workspace";
+            } else if (path.includes('trig')) {
+                titleEl.innerText = "📏 Trigonometry Scratch Workspace";
+            }
+            initCanvas();
+        });
+
+        // --- 2. POPUP SLIDE CALCULATOR UTILITY LOGIC ---
+        function toggleCalculator() {
+            const panel = document.getElementById('calculator-panel');
+            panel.classList.toggle('open');
+        }
+
+        let currentExpr = "";
+        const calcDisplay = document.getElementById('calc-display');
+
+        function pressNum(num) {
+            if (currentExpr === "0" || currentExpr === "Error") currentExpr = "";
+            currentExpr += num;
+            calcDisplay.value = currentExpr;
+        }
+
+        function pressOp(op) {
+            currentExpr += op;
+            calcDisplay.value = currentExpr;
+        }
+
+        function pressClear() {
+            currentExpr = "0";
+            calcDisplay.value = currentExpr;
+        }
+
+        function pressEqual() {
+            try {
+                // Evaluates basic inline arithmetic calculations safely
+                let sanitized = currentExpr.replace(/×/g, '*').replace(/÷/g, '/');
+                if(!sanitized) return;
+                let result = Function('"use strict"; return (' + sanitized + ')')();
+                currentExpr = String(result);
+                calcDisplay.value = currentExpr;
+            } catch (err) {
+                calcDisplay.value = "Error";
+                currentExpr = "";
+            }
+        }
+
+        // --- 3. FULL SCREEN DRAWING PAPER LOGIC ---
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Set drawing lines styling parameters
+            ctx.strokeStyle = '#02462c'; // Smooth matching contrast color
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        // Resize protection layout re-index
+        window.addEventListener('resize', () => {
+            // Backup canvas image data before resize scale shift resets it
+            const tempImage = canvas.toDataURL();
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.strokeStyle = '#02462c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            let img = new Image();
+            img.src = tempImage;
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        });
+
+        // Mouse Drawing Listeners
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+        // Mobile Touch Screen Drawing Listeners
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            const touch = e.touches[0];
+            ctx.beginPath();
+            ctx.moveTo(touch.clientX, touch.clientY);
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            ctx.lineTo(touch.clientX, touch.clientY);
+            ctx.stroke();
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('touchend', () => isDrawing = false);
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
