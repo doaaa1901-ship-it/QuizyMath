@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Workspace & Trigonometry Canvas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #012b1a;
+        }
+
+        /* --- THE WRITING PAPER CANVAS --- */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            background-color: #fbfdfa;
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(0, 70, 44, 0.06) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 70, 44, 0.06) 1px, transparent 1px);
+        }
+
+        /* Workspace Controls Top Bar Overlay */
+        .workspace-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .header-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .workspace-title {
+            background: rgba(1, 43, 26, 0.95);
+            color: #6ad7a8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- SHAPE TOOLBAR --- */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            background: rgba(1, 43, 26, 0.9);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(106, 215, 168, 0.2);
+        }
+
+        .tool-btn {
+            background: #194236;
+            color: #e6f0ec;
+            border: 1px solid transparent;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-btn:hover {
+            background: #235c4b;
+            color: #6ad7a8;
+        }
+
+        .tool-btn.active {
+            background: #6ad7a8;
+            color: #012b1a;
+            border-color: #fff;
+            box-shadow: 0 0 8px rgba(106, 215, 168, 0.6);
+        }
+
+        .clear-btn {
+            background: #9c4141;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .clear-btn:hover { background: #bd4f4f; }
+
+        /* --- FLOATING CALCULATOR ICON (TOP RIGHT) --- */
+        #calc-toggle-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: #194236;
+            color: #6ad7a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid rgba(106, 215, 168, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #calc-toggle-icon:hover {
+            background: #6ad7a8;
+            color: #012b1a;
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* --- ADVANCED TRIG POPUP CALCULATOR PANEL --- */
+        #calculator-panel {
+            position: absolute;
+            top: 90px;
+            right: -420px;
+            width: 380px; 
+            background: rgba(1, 43, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid #6ad7a8;
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 90;
+            box-shadow: -5px 10px 30px rgba(0,0,0,0.5);
+            transition: right 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        #calculator-panel.open {
+            right: 20px;
+        }
+
+        .calc-header-utility {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .mode-toggle {
+            background: #0d261f;
+            color: #6ad7a8;
+            border: 1px solid rgba(106, 215, 168, 0.3);
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .calc-screen {
+            width: 100%;
+            height: 60px;
+            background: #0d1a15;
+            border: 1px solid rgba(106, 215, 168, 0.3);
+            border-radius: 8px;
+            color: #6ad7a8;
+            text-align: right;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .calc-btn {
+            padding: 12px 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: #194236;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #6ad7a8;
+        }
+
+        .calc-btn.trig-op {
+            background: #0a4d34;
+            color: #8ffbd0;
+            font-size: 0.85rem;
+        }
+        .calc-btn.trig-op:hover { background: #116b4a; }
+
+        .calc-btn.operator {
+            color: #6ad7a8;
+            background: #0d261f;
+        }
+
+        .calc-btn.clear { background: #9c4141; }
+        .calc-btn.clear:hover { background: #bd4f4f; }
+
+        .calc-btn.equal {
+            background: #6ad7a8;
+            color: #012b1a;
+            grid-column: span 2;
+        }
+        .calc-btn.equal:hover { background: #8ffbd0; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Left Controls Layout Stack -->
+    <div class="workspace-ui">
+        <div class="header-row">
+            <div class="workspace-title" id="page-title">📐 Trigonometry Advanced Workspace</div>
+            <button class="clear-btn" onclick="clearCanvas()">Clear Paper 🗑️</button>
+        </div>
+        
+        <!-- Shape & Angle Drawing Panel -->
+        <div class="toolbar">
+            <button class="tool-btn active" id="tool-free" onclick="setTool('free')">✏️ Free Draw</button>
+            <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">🟦 Rectangle</button>
+            <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">⚪ Circle</button>
+            <button class="tool-btn" id="tool-triangle" onclick="setTool('triangle')">📐 Triangle</button>
+            <button class="tool-btn" id="tool-angle" onclick="setTool('angle')">🔄 Angle Arc</button>
+        </div>
+    </div>
+
+    <!-- Floating Trigger Icon (Top Right) -->
+    <div id="calc-toggle-icon" onclick="toggleCalculator()">🖩</div>
+
+    <!-- Slide-Out Scientific Trigonometry Calculator Widget Panel -->
+    <div id="calculator-panel">
+        <div class="calc-header-utility">
+            <span style="color:#6ad7a8; font-size:0.8rem; font-weight:bold;">Trig Mode</span>
+            <button class="mode-toggle" id="angle-mode-btn" onclick="toggleAngleMode()">DEG</button>
+        </div>
+        <input type="text" id="calc-display" class="calc-screen" readonly value="0">
+        <div class="calc-grid">
+            <!-- Row 1: Advanced functions -->
+            <button class="calc-btn trig-op" onclick="pressTrig('sin(')">sin</button>
+            <button class="calc-btn trig-op" onclick="pressTrig('cos(')">cos</button>
+            <button class="calc-btn trig-op" onclick="pressTrig('tan(')">tan</button>
+            <button class="calc-btn operator" onclick="pressOp('Math.PI')">π</button>
+            <button class="calc-btn clear" onclick="pressClear()">C</button>
+            
+            <!-- Row 2 -->
+            <button class="calc-btn trig-op" onclick="pressTrig('asin(')">asin</button>
+            <button class="calc-btn trig-op" onclick="pressTrig('acos(')">acos</button>
+            <button class="calc-btn trig-op" onclick="pressTrig('atan(')">atan</button>
+            <button class="calc-btn operator" onclick="pressOp('Math.E')">e</button>
+            <button class="calc-btn operator" onclick="pressOp('/')">÷</button>
+            
+            <!-- Row 3 -->
+            <button class="calc-btn operator" onclick="pressOp('**')">xʸ</button>
+            <button class="calc-btn" onclick="pressNum('7')">7</button>
+            <button class="calc-btn" onclick="pressNum('8')">8</button>
+            <button class="calc-btn" onclick="pressNum('9')">9</button>
+            <button class="calc-btn operator" onclick="pressOp('*')">×</button>
+            
+            <!-- Row 4 -->
+            <button class="calc-btn operator" onclick="pressOp('(')">(</button>
+            <button class="calc-btn" onclick="pressNum('4')">4</button>
+            <button class="calc-btn" onclick="pressNum('5')">5</button>
+            <button class="calc-btn" onclick="pressNum('6')">6</button>
+            <button class="calc-btn operator" onclick="pressOp('-')">-</button>
+            
+            <!-- Row 5 -->
+            <button class="calc-btn operator" onclick="pressOp(')')">)</button>
+            <button class="calc-btn" onclick="pressNum('1')">1</button>
+            <button class="calc-btn" onclick="pressNum('2')">2</button>
+            <button class="calc-btn" onclick="pressNum('3')">3</button>
+            <button class="calc-btn operator" onclick="pressOp('+')">+</button>
+            
+            <!-- Row 6 -->
+            <button class="calc-btn operator" style="font-size:0.8rem;" onclick="pressTrig('Math.sqrt(')">√</button>
+            <button class="calc-btn" onclick="pressNum('0')">0</button>
+            <button class="calc-btn" onclick="pressNum('.')">.</button>
+            <button class="calc-btn equal" onclick="pressEqual()">=</button>
+        </div>
+    </div>
+
+    <!-- Canvas Base Structure -->
+    <div id="canvas-container">
+        <canvas id="paintCanvas"></canvas>
+    </div>
+
+    <script>
+        let currentTool = 'free';
+        let isDrawing = false;
+        let startX, startY;
+        let snapshotData = null;
+
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initCanvas();
+        });
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tool-${tool}`).classList.add('active');
+        }
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            resetCanvasStyling();
+        }
+
+        function resetCanvasStyling() {
+            ctx.strokeStyle = '#02462c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function saveSnapshot() {
+            snapshotData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        function restoreSnapshot() {
+            if (snapshotData) ctx.putImageData(snapshotData, 0, 0);
+        }
+
+        // --- DRAWING PROCESSING HANDLING ENGINE ---
+        function handleStart(x, y) {
+            isDrawing = true;
+            startX = x;
+            startY = y;
+            ctx.beginPath();
+            if (currentTool === 'free') {
+                ctx.moveTo(x, y);
+            } else {
+                saveSnapshot();
+            }
+        }
+
+        function handleMove(x, y) {
+            if (!isDrawing) return;
+
+            if (currentTool === 'free') {
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else {
+                restoreSnapshot();
+                ctx.beginPath();
+                resetCanvasStyling();
+
+                if (currentTool === 'rect') {
+                    ctx.strokeRect(startX, startY, x - startX, y - startY);
+                } 
+                else if (currentTool === 'circle') {
+                    let radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'triangle') {
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(x, y);
+                    ctx.lineTo(startX - (x - startX), y);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                else if (currentTool === 'angle') {
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(startX + 120, startY);
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    
+                    let angle = Math.atan2(y - startY, x - startX);
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#9c4141';
+                    ctx.lineWidth = 2;
+                    ctx.arc(startX, startY, 40, 0, angle, angle < 0);
+                    ctx.stroke();
+                    
+                    let degrees = Math.round(angle * (180 / Math.PI));
+                    if (degrees < 0) degrees += 360;
+                    ctx.fillStyle = '#012b1a';
+                    ctx.font = 'bold 12px Segoe UI';
+                    ctx.fillText(degrees + '°', startX + 50, startY - 10);
+                }
+            }
+        }
+
+        function handleEnd() {
+            isDrawing = false;
+        }
+
+        // --- EVENT ATTACHMENTS ---
+        canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        canvas.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('mouseleave', handleEnd);
+
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            handleStart(touch.clientX, touch.clientY);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchend', handleEnd);
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            snapshotData = null;
+        }
+
+        // --- CALIBRATED UTILITY INTERFACE LOGIC ---
+        function toggleCalculator() {
+            const panel = document.getElementById('calculator-panel');
+            panel.classList.toggle('open');
+        }
+
+        // --- TRIGONOMETRIC ENGINE LOGIC ---
+        let displayExpr = ""; 
+        let evaluationExpr = ""; 
+        let isDegreeMode = true;
+        const calcDisplay = document.getElementById('calc-display');
+
+        function toggleAngleMode() {
+            isDegreeMode = !isDegreeMode;
+            document.getElementById('angle-mode-btn').innerText = isDegreeMode ? "DEG" : "RAD";
+        }
+
+        function pressNum(num) {
+            if (calcDisplay.value === "0" || calcDisplay.value === "Error") {
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+            displayExpr += num;
+            evaluationExpr += num;
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressOp(op) {
+            displayExpr += op.replace('Math.PI', 'π').replace('Math.E', 'e');
+            evaluationExpr += op;
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressTrig(funcToken) {
+            if (calcDisplay.value === "0" || calcDisplay.value === "Error") {
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+            
+            let visualName = funcToken.replace('Math.', '');
+            displayExpr += visualName;
+            
+            if (isDegreeMode && (visualName.startsWith('sin') || visualName.startsWith('cos') || visualName.startsWith('tan'))) {
+                evaluationExpr += `Math.${visualName}((`;
+            } else {
+                evaluationExpr += `Math.${visualName}`;
+            }
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressClear() {
+            displayExpr = "";
+            evaluationExpr = "";
+            calcDisplay.value = "0";
+        }
+
+        function pressEqual() {
+            try {
+                let runtimeStr = evaluationExpr.replace(/÷/g, '/').replace(/×/g, '*');
+                
+                if (isDegreeMode) {
+                    let openPatterns = (runtimeStr.match(/\(\(/g) || []).length;
+                    let closePatterns = (runtimeStr.match(/\)/g) || []).length;
+                    let missingCount = openPatterns - closePatterns;
+                    for(let i=0; i < missingCount; i++) {
+                        runtimeStr += ") * Math.PI / 180)";
+                    }
+                }
+
+                if(!runtimeStr) return;
+                let result = Function('"use strict"; return (' + runtimeStr + ')')();
+                
+                if (typeof result === 'number' && !Number.isInteger(result)) {
+                    result = parseFloat(result.toFixed(8));
+                }
+                
+                calcDisplay.value = result;
+                displayExpr = String(result);
+                evaluationExpr = String(result);
+            } catch (err) {
+                calcDisplay.value = "Error";
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const tempImage = canvas.toDataURL();
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            resetCanvasStyling();
+            let img = new Image();
+            img.src = tempImage;
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+/* --- RESET & BASIC STYLING ENGINE --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: radial-gradient(circle at top right, #113627, #011d12);
+  color: #e6f0ec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* --- HERO DASHBOARD HEADER CHASSIS --- */
+.main-header {
+  text-align: center;
+  max-width: 800px;
+  margin-bottom: 10px;
+}
+
+.header-badge {
+  display: inline-block;
+  background: rgba(106, 215, 168, 0.15);
+  color: #6ad7a8;
+  border: 1px solid rgba(106, 215, 168, 0.3);
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.main-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.main-header p {
+  font-size: 1.05rem;
+  color: #a3c2b5;
+  line-height: 1.6;
+}
+
+/* --- THE MAIN FLEX CONTAINER --- */
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 10px;
+}
+
+/* --- FLEXIBLE SYSTEM PANELS --- */
+.flex-item {
+  background: rgba(13, 38, 31, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(106, 215, 168, 0.15);
+  padding: 30px;
+  border-radius: 16px;
+  flex: 1; 
+  min-width: 320px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.flex-item:hover {
+  border-color: rgba(106, 215, 168, 0.4);
+  transform: translateY(-4px);
+}
+
+/* --- PANEL CARD INTERNAL GRAPHICS --- */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(106, 215, 168, 0.1);
+  padding-bottom: 15px;
+}
+
+.card-icon {
+  font-size: 1.6rem;
+}
+
+.card-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #6ad7a8;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* --- COMPONENT STYLING FOR STRUCTURAL BUTTONS --- */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e6f0ec;
+  background: #14352b;
+  border: 1px solid rgba(106, 215, 168, 0.1);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-emoji {
+  font-size: 1.15rem;
+}
+
+.btn-text {
+  flex: 1;
+  text-align: left;
+}
+
+/* INTERACTIVE STATES */
+.nav-btn:hover {
+  background: #6ad7a8;
+  color: #012b1a;
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(106, 215, 168, 0.35);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
+}
+
+/* SPECIAL ACTION INTERFACES */
+.highlight-btn {
+  background: #1e4d3e;
+  border-color: rgba(106, 215, 168, 0.3);
+}
+
+.assessment-btn {
+  background: #253342;
+  border-color: rgba(110, 168, 255, 0.2);
+}
+.assessment-btn:hover {
+  background: #5294e2;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(82, 148, 226, 0.35);
+}
+
+/* SYSTEM TEXT NOTIFICATIONS */
+.module-status-wrapper {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  background: rgba(1, 20, 13, 0.5);
+  padding: 14px;
+  border-radius: 8px;
+  border-left: 3px solid #6ad7a8;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: #6ad7a8;
+  border-radius: 50%;
+  margin-top: 4px;
+  box-shadow: 0 0 8px #6ad7a8;
+}
+
+.status-text {
+  font-size: 0.8rem;
+  color: #9cbdae;
+  line-height: 1.4;
+}
+
+/* --- FOOTER LAYOUT BOUNDS --- */
+.main-footer {
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: #618073;
+  text-align: center;
+}
+
+/* RESPONSIVE LAYOUT OPTIMIZATION MATRIX */
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+  .main-header h1 {
+    font-size: 1.9rem;
+  }
+  .flex-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .flex-item {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+
+
+/* --- THREE-BUTTON ACTION ROW --- */
+.auth-action-container {
+  display: flex;
+  gap: 8px; /* Slightly tighter gap to accommodate three items */
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Applied to all three buttons in the row */
+.auth-btn {
+  flex: 1; /* Forces all 3 buttons to maintain identical width */
+  padding: 12px 4px; /* Optimized padding for horizontal alignment */
+  font-size: 0.85rem; /* Slightly smaller text so it fits comfortably on smaller screens */
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  gap: 6px; /* Space between emoji and text */
+}
+
+/* Settings Button Specific Color */
+.settings-btn {
+  background: #1c2e28;
+  border-color: rgba(106, 215, 168, 0.2);
+}
+.settings-btn:hover {
+  background: #2c443c;
+  color: #6ad7a8;
+  border-color: #6ad7a8;
+  box-shadow: 0 6px 15px rgba(106, 215, 168, 0.15);
+}
+
+/* Log In Button Specific Color */
+.login-btn {
+  background: #14352b;
+  border-color: rgba(106, 215, 168, 0.1);
+}
+.login-btn:hover {
+  background: #255243;
+  color: #e6f0ec;
+  border-color: rgba(106, 215, 168, 0.4);
+}
+
+/* Sign Up Button Specific Color */
+.signup-btn {
+  background: #0d261f;
+  border-color: #6ad7a8;
+  color: #6ad7a8;
+}
+.signup-btn:hover {
+  background: #6ad7a8;
+  color: #012b1a;
+  border-color: #ffffff;
+  box-shadow: 0 6px 15px rgba(106, 215, 168, 0.3);
+}
+
+/* Smooth fallback for mobile viewports if screen is extremely narrow */
+@media (max-width: 400px) {
+  .auth-action-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .auth-btn {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}

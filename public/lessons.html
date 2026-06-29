@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Hub & Interactive Workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #012b1a;
+        }
+
+        /* --- SPLIT LAYOUT CONTAINER --- */
+        #main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- LEFT PANEL: MATH LESSONS INDEX --- */
+        #lessons-panel {
+            width: 360px;
+            height: 100%;
+            background: rgba(1, 43, 26, 0.98);
+            border-right: 2px solid rgba(106, 215, 168, 0.3);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            color: #e6f0ec;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .lessons-header {
+            padding: 24px 20px;
+            background: #0d261f;
+            border-bottom: 1px solid rgba(106, 215, 168, 0.2);
+        }
+
+        .lessons-header h2 {
+            color: #6ad7a8;
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+
+        .lessons-header p {
+            font-size: 0.85rem;
+            color: #8fa89e;
+        }
+
+        .lessons-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .lesson-card {
+            background: #194236;
+            border: 1px solid rgba(106, 215, 168, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lesson-card:hover {
+            background: #235c4b;
+            border-color: #6ad7a8;
+            transform: translateY(-2px);
+        }
+
+        .lesson-card.active {
+            background: #6ad7a8;
+            color: #012b1a;
+            border-color: #fff;
+        }
+
+        .lesson-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lesson-card p {
+            font-size: 0.8rem;
+            color: #b0c4bc;
+            line-height: 1.3;
+        }
+
+        .lesson-card.active p {
+            color: #0d261f;
+        }
+
+        /* --- RIGHT PANEL: LIVE INTERACTIVE CANVAS --- */
+        #canvas-viewport {
+            flex: 1;
+            height: 100%;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            background-color: #fbfdfa;
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(0, 70, 44, 0.06) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 70, 44, 0.06) 1px, transparent 1px);
+        }
+
+        /* --- CONTROL OVERLAYS --- */
+        .workspace-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .header-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .workspace-title {
+            background: rgba(1, 43, 26, 0.95);
+            color: #6ad7a8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(106, 215, 168, 0.2);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            background: rgba(1, 43, 26, 0.9);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(106, 215, 168, 0.2);
+        }
+
+        .tool-btn {
+            background: #194236;
+            color: #e6f0ec;
+            border: 1px solid transparent;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-btn:hover {
+            background: #235c4b;
+            color: #6ad7a8;
+        }
+
+        .tool-btn.active {
+            background: #6ad7a8;
+            color: #012b1a;
+            border-color: #fff;
+            box-shadow: 0 0 8px rgba(106, 215, 168, 0.6);
+        }
+
+        .clear-btn {
+            background: #9c4141;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .clear-btn:hover { background: #bd4f4f; }
+
+        /* --- FLOATING CALCULATOR TOGGLE --- */
+        #calc-toggle-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            background: #194236;
+            color: #6ad7a8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid rgba(106, 215, 168, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #calc-toggle-icon:hover {
+            background: #6ad7a8;
+            color: #012b1a;
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* --- ADVANCED TRIG CALCULATOR PANEL --- */
+        #calculator-panel {
+            position: absolute;
+            top: 90px;
+            right: -420px;
+            width: 380px; 
+            background: rgba(1, 43, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid #6ad7a8;
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 90;
+            box-shadow: -5px 10px 30px rgba(0,0,0,0.5);
+            transition: right 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        #calculator-panel.open {
+            right: 20px;
+        }
+
+        .calc-header-utility {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .mode-toggle {
+            background: #0d261f;
+            color: #6ad7a8;
+            border: 1px solid rgba(106, 215, 168, 0.3);
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .calc-screen {
+            width: 100%;
+            height: 60px;
+            background: #0d1a15;
+            border: 1px solid rgba(106, 215, 168, 0.3);
+            border-radius: 8px;
+            color: #6ad7a8;
+            text-align: right;
+            padding: 10px;
+            font-size: 1.5rem;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .calc-btn {
+            padding: 12px 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: #194236;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #6ad7a8;
+        }
+
+        .calc-btn.trig-op {
+            background: #0a4d34;
+            color: #8ffbd0;
+            font-size: 0.85rem;
+        }
+        .calc-btn.trig-op:hover { background: #116b4a; }
+
+        .calc-btn.operator {
+            color: #6ad7a8;
+            background: #0d261f;
+        }
+
+        .calc-btn.clear { background: #9c4141; }
+        .calc-btn.clear:hover { background: #bd4f4f; }
+
+        .calc-btn.equal {
+            background: #6ad7a8;
+            color: #012b1a;
+            grid-column: span 2;
+        }
+        .calc-btn.equal:hover { background: #8ffbd0; }
+
+        /* --- GUIDE / LESSON OVERLAY BANNER --- */
+        #lesson-banner {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(1, 43, 26, 0.95);
+            border: 1px solid #6ad7a8;
+            border-radius: 8px;
+            padding: 15px 20px;
+            z-index: 10;
+            color: #e6f0ec;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #lesson-banner h4 {
+            color: #6ad7a8;
+            margin-bottom: 3px;
+        }
+
+        #lesson-banner p {
+            font-size: 0.85rem;
+            color: #b0c4bc;
+        }
+
+        .banner-btn {
+            background: #6ad7a8;
+            color: #012b1a;
+            border: none;
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .banner-btn:hover {
+            background: #8ffbd0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-container">
+        
+        <!-- LEFT PANEL: LESSON SELECTION MENU -->
+        <div id="lessons-panel">
+            <div class="lessons-header">
+                <h2>Mathematics Lessons</h2>
+                <p>Select a structural module to initialize</p>
+            </div>
+            <div class="lessons-list">
+                <div class="lesson-card active" onclick="loadLesson('trig_basics', this)">
+                    <h3>📐 Unit 1: Trigonometric Identities</h3>
+                    <p>Master standard relations, reciprocal properties, and solving equations cleanly.</p>
+                </div>
+                <div class="lesson-card" onclick="loadLesson('matrices_ops', this)">
+                    <h3>🔲 Unit 2: Matrices & Determinants</h3>
+                    <p>Explore matrix operations, transposition, structural systems, and structural inversions.</p>
+                </div>
+                <div class="lesson-card" onclick="loadLesson('angle_arc', this)">
+                    <h3>🔄 Unit 3: Sector Arcs & Polar Measures</h3>
+                    <p>Calculate precise dynamic arcs, arc lengths, radian bounds, and vector orientations.</p>
+                </div>
+                <div class="lesson-card" onclick="loadLesson('linear_programming', this)">
+                    <h3>📈 Unit 4: Linear Inequality Systems</h3>
+                    <p>Map out constraints and determine exact boundary vertices using coordinate systems.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: MAIN ENGINE VIEWPORT -->
+        <div id="canvas-viewport">
+            
+            <!-- Top Controls Overlays -->
+            <div class="workspace-ui">
+                <div class="header-row">
+                    <div class="workspace-title" id="page-title">Interactive Workspace</div>
+                    <button class="clear-btn" onclick="clearCanvas()">Clear Paper 🗑️</button>
+                </div>
+                
+                <!-- Shape & Vector Toolbar Engine -->
+                <div class="toolbar">
+                    <button class="tool-btn active" id="tool-free" onclick="setTool('free')">✏️ Free Draw</button>
+                    <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">🟦 Rectangle</button>
+                    <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">⚪ Circle</button>
+                    <button class="tool-btn" id="tool-triangle" onclick="setTool('triangle')">📐 Triangle</button>
+                    <button class="tool-btn" id="tool-angle" onclick="setTool('angle')">🔄 Angle Arc</button>
+                </div>
+            </div>
+
+            <!-- Floating Scientific Trigger Toggle Button -->
+            <div id="calc-toggle-icon" onclick="toggleCalculator()">🖩</div>
+
+            <!-- Slide-Out Scientific Trigonometry Calculator Panel Component -->
+            <div id="calculator-panel">
+                <div class="calc-header-utility">
+                    <span style="color:#6ad7a8; font-size:0.8rem; font-weight:bold;">Trig Mode</span>
+                    <button class="mode-toggle" id="angle-mode-btn" onclick="toggleAngleMode()">DEG</button>
+                </div>
+                <input type="text" id="calc-display" class="calc-screen" readonly value="0">
+                <div class="calc-grid">
+                    <button class="calc-btn trig-op" onclick="pressTrig('sin(')">sin</button>
+                    <button class="calc-btn trig-op" onclick="pressTrig('cos(')">cos</button>
+                    <button class="calc-btn trig-op" onclick="pressTrig('tan(')">tan</button>
+                    <button class="calc-btn operator" onclick="pressOp('Math.PI')">π</button>
+                    <button class="calc-btn clear" onclick="pressClear()">C</button>
+                    
+                    <button class="calc-btn trig-op" onclick="pressTrig('asin(')">asin</button>
+                    <button class="calc-btn trig-op" onclick="pressTrig('acos(')">acos</button>
+                    <button class="calc-btn trig-op" onclick="pressTrig('atan(')">atan</button>
+                    <button class="calc-btn operator" onclick="pressOp('Math.E')">e</button>
+                    <button class="calc-btn operator" onclick="pressOp('/')">÷</button>
+                    
+                    <button class="calc-btn operator" onclick="pressOp('**')">xʸ</button>
+                    <button class="calc-btn" onclick="pressNum('7')">7</button>
+                    <button class="calc-btn" onclick="pressNum('8')">8</button>
+                    <button class="calc-btn" onclick="pressNum('9')">9</button>
+                    <button class="calc-btn operator" onclick="pressOp('*')">×</button>
+                    
+                    <button class="calc-btn operator" onclick="pressOp('(')">(</button>
+                    <button class="calc-btn" onclick="pressNum('4')">4</button>
+                    <button class="calc-btn" onclick="pressNum('5')">5</button>
+                    <button class="calc-btn" onclick="pressNum('6')">6</button>
+                    <button class="calc-btn operator" onclick="pressOp('-')">-</button>
+                    
+                    <button class="calc-btn operator" onclick="pressOp(')')">)</button>
+                    <button class="calc-btn" onclick="pressNum('1')">1</button>
+                    <button class="calc-btn" onclick="pressNum('2')">2</button>
+                    <button class="calc-btn" onclick="pressNum('3')">3</button>
+                    <button class="calc-btn operator" onclick="pressOp('+')">+</button>
+                    
+                    <button class="calc-btn operator" style="font-size:0.8rem;" onclick="pressTrig('Math.sqrt(')">√</button>
+                    <button class="calc-btn" onclick="pressNum('0')">0</button>
+                    <button class="calc-btn" onclick="pressNum('.')">.</button>
+                    <button class="calc-btn equal" onclick="pressEqual()">=</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Guide Overlay Banner System -->
+            <div id="lesson-banner">
+                <div>
+                    <h4 id="banner-topic">Current Unit: Trigonometric Identities</h4>
+                    <p id="banner-desc">Use the 📐 Triangle tool to draw your reference triangle on the workspace, then use the scientific panel to evaluate functions.</p>
+                </div>
+                <button class="banner-btn" onclick="autoDrawConcept()">Show Formula Sandbox</button>
+            </div>
+
+            <!-- Core Canvas Rendering Layout Container -->
+            <div id="canvas-container">
+                <canvas id="paintCanvas"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- DATA DICTIONARY FOR STRUCTURAL LESSONS ---
+        const lessonData = {
+            trig_basics: {
+                title: "Trigonometric Identities",
+                desc: "Use the 📐 Triangle tool to draw your reference triangle on the workspace, then use the scientific panel to evaluate functions.",
+                tool: "triangle"
+            },
+            matrices_ops: {
+                title: "Matrices & Determinants",
+                desc: "Switch to 🟦 Rectangle tool to map matrix structures. Calculate structural transformations and determinants.",
+                tool: "rect"
+            },
+            angle_arc: {
+                title: "Sector Arcs & Polar Measures",
+                desc: "Select the 🔄 Angle Arc tool. Click and drag outwards to map exact spatial rotation segments dynamically.",
+                tool: "angle"
+            },
+            linear_programming: {
+                title: "Linear Inequality Systems",
+                desc: "Use ✏️ Free Draw to graph coordinate constraints and isolate feasible intersection regions.",
+                tool: "free"
+            }
+        };
+
+        let currentLessonKey = "trig_basics";
+        let currentTool = 'free';
+        let isDrawing = false;
+        let startX, startY;
+        let snapshotData = null;
+
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initCanvas();
+        });
+
+        // --- LESSON INDEX ROUTING CONTROLLER ---
+        function loadLesson(lessonKey, element) {
+            currentLessonKey = lessonKey;
+            
+            // Toggle active card element state
+            document.querySelectorAll('.lesson-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+
+            // Map and update information blocks dynamically
+            const lesson = lessonData[lessonKey];
+            document.getElementById('banner-topic').innerText = `Current Unit: ${lesson.title}`;
+            document.getElementById('banner-desc').innerText = lesson.desc;
+            
+            // Auto sync active context tool configuration
+            setTool(lesson.tool);
+            clearCanvas();
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(`tool-${tool}`);
+            if(targetBtn) targetBtn.classList.add('active');
+        }
+
+        function initCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            resetCanvasStyling();
+        }
+
+        function resetCanvasStyling() {
+            ctx.strokeStyle = '#02462c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function saveSnapshot() {
+            snapshotData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        function restoreSnapshot() {
+            if (snapshotData) ctx.putImageData(snapshotData, 0, 0);
+        }
+
+        // --- CONCEPT SANDBOX AUTO-RENDER LOGIC ---
+        function autoDrawConcept() {
+            clearCanvas();
+            resetCanvasStyling();
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            if (currentLessonKey === 'trig_basics') {
+                // Render perfect right triangle archetype
+                ctx.beginPath();
+                ctx.moveTo(cx - 100, cy + 80);
+                ctx.lineTo(cx + 120, cy + 80);
+                ctx.lineTo(cx + 120, cy - 100);
+                ctx.closePath();
+                ctx.stroke();
+
+                ctx.fillStyle = '#012b1a';
+                ctx.font = 'bold 14px Segoe UI';
+                ctx.fillText("Opposite", cx + 130, cy);
+                ctx.fillText("Adjacent", cx - 20, cy + 105);
+                ctx.fillText("Hypotenuse", cx - 50, cy - 20);
+            } 
+            else if (currentLessonKey === 'matrices_ops') {
+                // Render sample matrix structure layout bounds
+                ctx.strokeStyle = '#02462c';
+                ctx.font = '24px monospace';
+                ctx.fillStyle = '#012b1a';
+                
+                // Left brackets
+                ctx.beginPath(); ctx.moveTo(cx - 80, cy - 60); ctx.lineTo(cx - 110, cy - 60); ctx.lineTo(cx - 110, cy + 60); ctx.lineTo(cx - 80, cy + 60); ctx.stroke();
+                // Right brackets
+                ctx.beginPath(); ctx.moveTo(cx + 80, cy - 60); ctx.lineTo(cx + 110, cy - 60); ctx.lineTo(cx + 110, cy + 60); ctx.lineTo(cx + 80, cy + 60); ctx.stroke();
+
+                ctx.fillText("a₁₁  a₁₂", cx - 50, cy - 15);
+                ctx.fillText("a₂₁  a₂₂", cx - 50, cy + 25);
+            }
+            else if (currentLessonKey === 'angle_arc') {
+                // Render sample sector circle configuration
+                ctx.beginPath();
+                ctx.arc(cx, cy, 90, 0, -Math.PI / 3, true);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + 90, cy);
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + 45, cy - 77.9);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#9c4141';
+                ctx.font = 'bold 13px Segoe UI';
+                ctx.fillText("Arc Length (s) = r · θ", cx + 60, cy - 40);
+            }
+            else {
+                // Basic clean cross axes
+                ctx.beginPath();
+                ctx.moveTo(cx - 150, cy); ctx.lineTo(cx + 150, cy);
+                ctx.moveTo(cx, cy - 150); ctx.lineTo(cx, cy + 150);
+                ctx.stroke();
+            }
+        }
+
+        // --- DRAWING PROCESSING HANDLING ENGINE ---
+        function handleStart(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = x - rect.left;
+            const clientY = y - rect.top;
+
+            isDrawing = true;
+            startX = clientX;
+            startY = clientY;
+            ctx.beginPath();
+            if (currentTool === 'free') {
+                ctx.moveTo(clientX, clientY);
+            } else {
+                saveSnapshot();
+            }
+        }
+
+        function handleMove(x, y) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = x - rect.left;
+            const clientY = y - rect.top;
+
+            if (currentTool === 'free') {
+                ctx.lineTo(clientX, clientY);
+                ctx.stroke();
+            } else {
+                restoreSnapshot();
+                ctx.beginPath();
+                resetCanvasStyling();
+
+                if (currentTool === 'rect') {
+                    ctx.strokeRect(startX, startY, clientX - startX, clientY - startY);
+                } 
+                else if (currentTool === 'circle') {
+                    let radius = Math.sqrt(Math.pow(clientX - startX, 2) + Math.pow(clientY - startY, 2));
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'triangle') {
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(clientX, clientY);
+                    ctx.lineTo(startX - (clientX - startX), clientY);
+                    ctx.closePath();
+                    ctx.stroke();
+                } 
+                else if (currentTool === 'angle') {
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(startX + 120, startY);
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(clientX, clientY);
+                    ctx.stroke();
+                    
+                    let angle = Math.atan2(clientY - startY, clientX - startX);
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#9c4141';
+                    ctx.lineWidth = 2;
+                    ctx.arc(startX, startY, 40, 0, angle, angle < 0);
+                    ctx.stroke();
+                    
+                    let degrees = Math.round(angle * (180 / Math.PI));
+                    if (degrees < 0) degrees += 360;
+                    ctx.fillStyle = '#012b1a';
+                    ctx.font = 'bold 12px Segoe UI';
+                    ctx.fillText(degrees + '°', startX + 50, startY - 10);
+                }
+            }
+        }
+
+        function handleEnd() {
+            isDrawing = false;
+        }
+
+        // --- EVENT ATTACHMENTS ---
+        canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        canvas.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('mouseleave', handleEnd);
+
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            handleStart(touch.clientX, touch.clientY);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            handleMove(touch.clientX, touch.clientY);
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchend', handleEnd);
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            snapshotData = null;
+        }
+
+        function toggleCalculator() {
+            const panel = document.getElementById('calculator-panel');
+            panel.classList.toggle('open');
+        }
+
+        // --- TRIGONOMETRIC ENGINE EVALUATION LOGIC ---
+        let displayExpr = ""; 
+        let evaluationExpr = ""; 
+        let isDegreeMode = true;
+        const calcDisplay = document.getElementById('calc-display');
+
+        function toggleAngleMode() {
+            isDegreeMode = !isDegreeMode;
+            document.getElementById('angle-mode-btn').innerText = isDegreeMode ? "DEG" : "RAD";
+        }
+
+        function pressNum(num) {
+            if (calcDisplay.value === "0" || calcDisplay.value === "Error") {
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+            displayExpr += num;
+            evaluationExpr += num;
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressOp(op) {
+            displayExpr += op.replace('Math.PI', 'π').replace('Math.E', 'e');
+            evaluationExpr += op;
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressTrig(funcToken) {
+            if (calcDisplay.value === "0" || calcDisplay.value === "Error") {
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+            let visualName = funcToken.replace('Math.', '');
+            displayExpr += visualName;
+            
+            if (isDegreeMode && (visualName.startsWith('sin') || visualName.startsWith('cos') || visualName.startsWith('tan'))) {
+                evaluationExpr += `Math.${visualName}((`;
+            } else {
+                evaluationExpr += `Math.${visualName}`;
+            }
+            calcDisplay.value = displayExpr;
+        }
+
+        function pressClear() {
+            displayExpr = "";
+            evaluationExpr = "";
+            calcDisplay.value = "0";
+        }
+
+        function pressEqual() {
+            try {
+                let runtimeStr = evaluationExpr.replace(/÷/g, '/').replace(/×/g, '*');
+                
+                if (isDegreeMode) {
+                    let openPatterns = (runtimeStr.match(/\(\(/g) || []).length;
+                    let closePatterns = (runtimeStr.match(/\)/g) || []).length;
+                    let missingCount = openPatterns - closePatterns;
+                    for(let i=0; i < missingCount; i++) {
+                        runtimeStr += ") * Math.PI / 180)";
+                    }
+                }
+
+                if(!runtimeStr) return;
+                let result = Function('"use strict"; return (' + runtimeStr + ')')();
+                
+                if (typeof result === 'number' && !Number.isInteger(result)) {
+                    result = parseFloat(result.toFixed(8));
+                }
+                
+                calcDisplay.value = result;
+                displayExpr = String(result);
+                evaluationExpr = String(result);
+            } catch (err) {
+                calcDisplay.value = "Error";
+                displayExpr = "";
+                evaluationExpr = "";
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const tempImage = canvas.toDataURL();
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            resetCanvasStyling();
+            let img = new Image();
+            img.src = tempImage;
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        });
+    </script>
+</body>
+</html>
