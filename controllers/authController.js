@@ -2,16 +2,19 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const transporter = require('../config/mailer');
 
+// 1. تسجيل حساب جديد وإرسال كود التحقق
 exports.signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
             return res.status(400).json({ error: "جميع الحقول مطلوبة" });
         }
+        
         const existingUser = await User.findOne({ email });
         if (existingUser && existingUser.isVerified) {
             return res.status(400).json({ error: "هذا البريد الإلكتروني مسجل بالفعل" });
         }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); 
 
@@ -28,9 +31,10 @@ exports.signup = async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
-            subject: 'MathApp Verification Code 🔢',
+            subject: 'QuizyMath Verification Code 🔢',
             text: `مرحباً ${name}،\n\nكود التحقق الخاص بك لتفعيل حساب QuizyMath هو: ${verificationCode}\n\nبالتوفيق!`
         };
+        
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: "تم إرسال كود التحقق بنجاح" });
     } catch (err) {
@@ -39,6 +43,7 @@ exports.signup = async (req, res) => {
     }
 };
 
+// 2. إعادة إرسال كود التحقق
 exports.resendCode = async (req, res) => {
     try {
         const { email } = req.body;
@@ -53,7 +58,7 @@ exports.resendCode = async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
-            subject: 'MathApp New Verification Code 🔄',
+            subject: 'QuizyMath New Verification Code 🔄',
             text: `كود التحقق الجديد الخاص بك هو: ${newCode}`
         };
         await transporter.sendMail(mailOptions);
@@ -63,6 +68,7 @@ exports.resendCode = async (req, res) => {
     }
 };
 
+// 3. التحقق من كود التفعيل
 exports.verify = async (req, res) => {
     try {
         const { email, code } = req.body;
@@ -79,6 +85,7 @@ exports.verify = async (req, res) => {
     }
 };
 
+// 4. تسجيل الدخول
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;

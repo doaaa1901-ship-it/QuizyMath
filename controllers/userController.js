@@ -1,5 +1,6 @@
 const User = require('../models/User');
 
+// جلب بيانات الملف الشخصي الحالية
 exports.getProfile = async (req, res) => {
     try {
         const { email } = req.query;
@@ -14,10 +15,12 @@ exports.getProfile = async (req, res) => {
     }
 };
 
+// تعديل بيانات الملف الشخصي
 exports.updateProfile = async (req, res) => {
     try {
         const { email, name, profilePhoto } = req.body;
         const user = await User.findOne({ email });
+
         if (!user) return res.status(404).json({ error: "المستخدم غير موجود" });
 
         if (name) user.name = name;
