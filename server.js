@@ -19,22 +19,20 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 
-// --- [التعديل هنا لجعل المتصفح يرى المجلدات الجديدة] ---
-// تقديم الملفات الثابتة (CSS, JS, الصور، الصوت) من مجلداتها الجديدة مباشرة
+// تقديم الملفات الثابتة (CSS, JS, الصور، الصوت) من مجلداتها المنظمة داخل public
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/audio', express.static(path.join(__dirname, 'public/audio')));
 
-// تقديم ملفات الـ HTML من مجلدها الجديد تلقائياً
+// تقديم ملفات الـ HTML من مجلدها الفرعي داخل public تلقائياً عند طلب الموقع
 app.use(express.static(path.join(__dirname, 'public/html')));
-// ------------------------------------------------------
 
 // ربط المسارات بالـ APIs المخصصة لها
-app.use('/api', authRoutes);         // مسارات الـ Authentication
-app.use('/api/user', userRoutes);    // مسارات المستخدم والبروفايل
+app.use('/api', authRoutes);               // مسارات الـ Authentication
+app.use('/api/user', userRoutes);          // مسارات المستخدم والبروفايل
 app.use('/api/questions', questionRoutes); // مسارات الأسئلة
-app.use('/api/scores', scoreRoutes); // مسارات النتائج ولوحة الصدارة
+app.use('/api/scores', scoreRoutes);       // مسارات النتائج ولوحة الصدارة
 
 // تشغيل السيرفر والإعداد لـ Vercel
 if (process.env.NODE_ENV !== 'production') {
