@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quizy Math | Quiz</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/quiz.js" defer></script>
+  <style>
+    /* 🌿 General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2b3532, #4d6c48);
+      color: #5c5f5e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background 0.6s ease, color 0.6s ease;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #21473c, #20433f, #2c6441);
+      color: #e4e4e4;
+    }
+
+    /* 🧠 Container */
+    .container.quiz {
+      background: rgba(140, 170, 157, 0.15);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="dark">
+  <div class="container quiz">
+    <header>
+      <div id="timeNow">00:00 AM</div>
+      <div id="timer">⏳ Time: --</div>
+      <div id="scoreDisplay">Score: 0</div>
+      <div id="progressBarContainer"><div id="progressBar"></div></div>
+    </header>
+
+    <section id="questionSection">
+      <img id="questionImg" src="" alt="Question Image" class="hidden" />
+      <h2 id="questionText">Loading...</h2>
+      <div class="options" id="optionsContainer"></div>
+      <div id="feedback"></div>
+      <button id="skipBtn" class="skip-btn">⏭️ Skip</button>
+      <button id="hintBtn" class="hint-btn">💡 Hint</button>
+      <button id="showQuestionBtn" class="show-btn">📖 Show</button>
+    </section>
+  </div>
+
+  <audio id="correctSound" src="/audio/correct-choice-43861.mp3"></audio>
+  <audio id="wrongSound" src="/audio/wrong-47985.mp3"></audio>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours(), m = now.getMinutes().toString().padStart(2, "0");
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById("timeNow").textContent = `${h}:${m} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>

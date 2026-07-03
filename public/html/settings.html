@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quizy Math | Settings</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      /* 🌙 Hermit Mode (Dark, Calm) */
+      --bg1: #1a1f1e;
+      --bg2: #2a3533;
+      --bg3: #394944;
+      --text: #e8ecef;
+      --muted: #b8c2bf;
+      --card-bg: rgba(255,255,255,0.06);
+      --panel-bg: rgba(30,40,39,0.75);
+      --accent: #6ad7a8;
+      --btn-bg: #2d3c37;
+      --btn-bg-hover: #3d4d48;
+      --link: #9ec3b1;
+      --link-hover: #b6dfc9;
+    }
+
+    body.light-mode {
+      --bg1: #f7f7f5;
+      --bg2: #e8e8e4;
+      --bg3: #dcdcd6;
+      --text: #2e2f2b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="settings-card">
+    <h2>⚙️ Profile Settings</h2>
+    <div style="text-align: center; margin: 15px 0;">
+      <img id="preview" src="/images/default-profile.png" style="width:100px; height:100px; border-radius:50%; object-fit:cover;" /><br>
+      <input type="text" id="photoUrlInput" placeholder="Paste Image URL here" />
+    </div>
+    <label>Full Name:</label>
+    <input type="text" id="nameInput" placeholder="Enter your name" />
+    <button onclick="saveSettings()">Save Configuration</button>
+  </div>
+
+  <div id="customAlert" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg3); padding:20px; border-radius:12px; border:1px solid var(--accent); text-align:center; z-index:1000;">
+    <p id="alertMessage"></p>
+    <button id="alertOkBtn" style="margin-top:10px; width:auto;">OK</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("nameInput").value = localStorage.getItem("username") || "";
+      document.getElementById("preview").src = localStorage.getItem("profilePhoto") || "/images/default-profile.png";
+      document.getElementById("photoUrlInput").value = localStorage.getItem("profilePhoto") || "";
+    });
+
+    document.getElementById("photoUrlInput").addEventListener("input", function() {
+      if(this.value.trim() !== "") document.getElementById("preview").src = this.value;
+    });
+
+    function saveSettings() {
+      const name = document.getElementById("nameInput").value || "Guest";
+      const photoSrc = document.getElementById("preview").src;
+      const userEmail = localStorage.getItem("userEmail");
+
+      localStorage.setItem("username", name);
+      localStorage.setItem("profilePhoto", photoSrc);
+
+      // تنبيهاتكِ الأصلية بالتوقيتات اللي كنتِ كاتباها بالظبط بالملي ثانية
+      showTimedAlert(`...loading,`, 1290, () => {
+        showTimedAlert(`✅ Saved! Thanks for your patience, ${name}`, 2340, () => {
+            // المزامنة البرمجية مع السيرفر بعد انتهاء التنبيهات عشان الداتا متضيعش
+            if (userEmail) {
+                fetch('/api/user/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, name: name, profilePhoto: photoSrc })
+                }).catch(err => console.error("Sync error:", err));
+            }
+        });
+      });
+    }
+
+    function showTimedAlert(message, delayMs, onClose) {
+      const alertBox = document.getElementById("customAlert");
+      const okBtn = document.getElementById("alertOkBtn");
+      document.getElementById("alertMessage").textContent = message;
+
+      alertBox.style.display = "block";
+      okBtn.disabled = true;
+
+      setTimeout(() => { okBtn.disabled = false; }, delayMs);
+
+      okBtn.onclick = () => {
+        alertBox.style.display = "none";
+        if (typeof onClose === "function") onClose();
+      };
+    }
+  </script>
+</body>
+</html>
