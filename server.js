@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const scoreRoutes = require('./routes/scoreRoutes');
+
 const app = express();
 
 // الاتصال بقاعدة البيانات
@@ -18,13 +19,13 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 
-// تقديم الملفات الثابتة (CSS, JS, الصور، الصوت) من مجلداتها المنظمة داخل public
+// تقديم الملفات الثابتة من مجلداتها المنظمة داخل public
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/audio', express.static(path.join(__dirname, 'public/audio')));
 
-// تقديم ملفات الـ HTML من مجلدها الفرعي داخل public تلقائياً عند طلب الموقع
+// تقديم ملفات الـ HTML تلقائياً من مجلدها الجديد
 app.use(express.static(path.join(__dirname, 'public/html')));
 
 // ربط المسارات بالـ APIs المخصصة لها

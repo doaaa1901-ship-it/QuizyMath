@@ -1,13 +1,10 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController');
 
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('✅ Connected to MongoDB Atlas successfully!');
-    } catch (err) {
-        console.error('❌ Database Connection Error:', err);
-        process.exit(1); 
-    }
-};
+router.post('/signup', authController.signup);
+router.post('/resend-code', authController.resendCode);
+router.post('/verify', authController.verify);
+router.post('/login', authController.login);
 
-module.exports = connectDB;
+module.exports = router;

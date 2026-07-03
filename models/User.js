@@ -9,5 +9,4 @@ const UserSchema = new mongoose.Schema({
     profilePhoto: { type: String, default: 'images/default-profile.png' }
 });
 
-// التصدير الآمن لمنع التكرار
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

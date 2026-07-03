@@ -1,6 +1,5 @@
 const Score = require('../models/Score');
 
-// 1. حفظ نتيجة جديدة
 exports.saveScore = async (req, res) => {
     try {
         const { scoreText, difficulty, email } = req.body;
@@ -12,7 +11,6 @@ exports.saveScore = async (req, res) => {
     }
 };
 
-// 2. جلب لوحة الصدارة العامة (أعلى 10 نتائج)
 exports.getLeaderboard = async (req, res) => {
     try {
         const scores = await Score.find().sort({ createdAt: -1 }).limit(10);
@@ -22,7 +20,6 @@ exports.getLeaderboard = async (req, res) => {
     }
 };
 
-// 3. جلب التاريخ الشخصي لدرجات مستخدم معين (History)
 exports.getUserScores = async (req, res) => {
     try {
         const { email } = req.query;
