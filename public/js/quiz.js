@@ -1,7 +1,7 @@
 // ✅ Get all necessary elements
 const questionText = document.getElementById("questionText");
 const optionsContainer = document.getElementById("optionsContainer");
-const timerDisplay = document.querySelector("#timer span");
+const timerDisplay = document.getElementById("timeLeft");
 const feedback = document.getElementById("feedback");
 const questionImg = document.getElementById("questionImg");
 const correctSound = document.getElementById("correctSound");
