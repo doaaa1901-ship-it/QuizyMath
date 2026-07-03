@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
 
-const QuestionSchema = new mongoose.Schema({
-    category: String,
+const ScoreSchema = new mongoose.Schema({
+    email: String, 
+    scoreText: String,
     difficulty: String,
-    questionText: String,
-    options: [String],
-    correctAnswer: String,
-    hint: String
+    createdAt: { type: Date, default: Date.now }
 });
 
-// التحقق أولاً إذا كان الموديل موجوداً في الـ cache الخاص بـ mongoose، وإذا لم يكن، يقم بإنشائه
-module.exports = mongoose.models.Question || mongoose.model('Question', QuestionSchema);
+// التصدير الآمن لمنع التكرار
+module.exports = mongoose.models.Score || mongoose.model('Score', ScoreSchema);

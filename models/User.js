@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
-const QuestionSchema = new mongoose.Schema({
-    category: String,
-    difficulty: String,
-    questionText: String,
-    options: [String],
-    correctAnswer: String,
-    hint: String
+const UserSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    isVerified: { type: Boolean, default: false },
+    verificationCode: { type: String },
+    profilePhoto: { type: String, default: 'images/default-profile.png' }
 });
 
+// التصدير الآمن لمنع التكرار
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

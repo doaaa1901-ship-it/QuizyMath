@@ -1,6 +1,6 @@
 const Score = require('../models/Score');
 
-// حفظ نتيجة جديدة
+// 1. حفظ نتيجة جديدة
 exports.saveScore = async (req, res) => {
     try {
         const { scoreText, difficulty, email } = req.body;
@@ -12,7 +12,7 @@ exports.saveScore = async (req, res) => {
     }
 };
 
-// جلب لوحة الصدارة العامة (أعلى 10)
+// 2. جلب لوحة الصدارة العامة (أعلى 10 نتائج)
 exports.getLeaderboard = async (req, res) => {
     try {
         const scores = await Score.find().sort({ createdAt: -1 }).limit(10);
@@ -22,4 +22,15 @@ exports.getLeaderboard = async (req, res) => {
     }
 };
 
-// جلب التاريخ الشخصي لدرجات مستخدم معين (جديد)
+// 3. جلب التاريخ الشخصي لدرجات مستخدم معين (History)
+exports.getUserScores = async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: "البريد الإلكتروني مطلوب" });
+
+        const userScores = await Score.find({ email }).sort({ createdAt: -1 });
+        res.json(userScores);
+    } catch (err) {
+        res.status(500).json({ error: 'حدث خطأ أثناء جلب نتائج المستخدم' });
+    }
+};
