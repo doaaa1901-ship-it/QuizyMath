@@ -9,7 +9,6 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const scoreRoutes = require('./routes/scoreRoutes');
-
 const app = express();
 
 // الاتصال بقاعدة البيانات
