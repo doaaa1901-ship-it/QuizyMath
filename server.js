@@ -19,8 +19,16 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 
-// عرض ملفات الـ Frontend الثابتة
-app.use(express.static(path.join(__dirname, 'public')));
+// --- [التعديل هنا لجعل المتصفح يرى المجلدات الجديدة] ---
+// تقديم الملفات الثابتة (CSS, JS, الصور، الصوت) من مجلداتها الجديدة مباشرة
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/audio', express.static(path.join(__dirname, 'public/audio')));
+
+// تقديم ملفات الـ HTML من مجلدها الجديد تلقائياً
+app.use(express.static(path.join(__dirname, 'public/html')));
+// ------------------------------------------------------
 
 // ربط المسارات بالـ APIs المخصصة لها
 app.use('/api', authRoutes);         // مسارات الـ Authentication

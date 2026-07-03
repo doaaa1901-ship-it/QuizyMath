@@ -9,4 +9,4 @@ const QuestionSchema = new mongoose.Schema({
     hint: String
 });
 
-module.exports = mongoose.model('Question', QuestionSchema);
+module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

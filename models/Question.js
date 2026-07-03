@@ -9,4 +9,5 @@ const QuestionSchema = new mongoose.Schema({
     hint: String
 });
 
-module.exports = mongoose.model('Question', QuestionSchema);
+// التحقق أولاً إذا كان الموديل موجوداً في الـ cache الخاص بـ mongoose، وإذا لم يكن، يقم بإنشائه
+module.exports = mongoose.models.Question || mongoose.model('Question', QuestionSchema);
