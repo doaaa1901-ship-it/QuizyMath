@@ -1,17 +1,16 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Math App - Login & Sign Up</title>
-  <link rel="stylesheet" href="/css/styl.css"/>
+  <link rel="stylesheet" href="../css/styl.css"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <a href="settings.html" class="back-link"></a>
   <div class="container">
     <div class="form-box">
-      <img src="/images/Black White Simple Modern Neon Griddy Bold Technology Pixel Electronics Store Logo.png" alt="Math banner" class="banner"/>
+      <img src="../images/Black White Simple Modern Neon Griddy Bold Technology Pixel Electronics Store Logo.png" alt="Math banner" class="banner"/>
       <h2 id="formTitle">Login to MathApp</h2>
 
       <form id="loginForm">
@@ -32,7 +31,7 @@
   </div>
 
   <script>
-    // 🔗 الرابط النسبي السحري المتوافق مع Vercel
+    // 🛠️ التعديل البرمجي الوحيد لربط السيرفر أونلاين بدلاً من localhost
     const API_URL = "/api";
 
     function switchForm(type) {
@@ -70,7 +69,6 @@
 
         Swal.close();
 
-        // نافذة إدخال كود التفعيل المرسل للإيميل
         const { value: code } = await Swal.fire({
           title: "🔢 Enter Verification Code",
           text: `We sent a code to ${email}`,
@@ -112,10 +110,9 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        // حفظ بيانات الجلسة بنجاح
         localStorage.setItem("userEmail", data.user.email);
         localStorage.setItem("username", data.user.name);
-        localStorage.setItem("profilePhoto", data.user.profilePhoto || '/images/default-profile.png');
+        localStorage.setItem("profilePhoto", data.user.profilePhoto || 'images/default-profile.png');
 
         Swal.fire({
           icon: "success",

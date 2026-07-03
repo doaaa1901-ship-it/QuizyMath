@@ -4,15 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Quizy Math | Settings</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
   <style>
     :root {
-      --bg1: #1a1f1e; --bg2: #2a3533; --bg3: #394944; --text: #e8ecef; --muted: #b8c2bf; --accent: #6ad7a8; --btn-bg: #2d3c37;
+      /* 🌙 Hermit Mode (Dark, Calm) */
+      --bg1: #1a1f1e;
+      --bg2: #2a3533;
+      --bg3: #394944;
+      --text: #e8ecef;
+      --muted: #b8c2bf;
+      --card-bg: rgba(255,255,255,0.06);
+      --panel-bg: rgba(30,40,39,0.75);
+      --accent: #6ad7a8;
+      --btn-bg: #2d3c37;
+      --btn-bg-hover: #3d4d48;
+      --link: #9ec3b1;
+      --link-hover: #b6dfc9;
     }
-    body { background-color: var(--bg1); color: var(--text); font-family: "Segoe UI", sans-serif; padding: 2rem; }
-    .settings-card { background: var(--bg2); border-radius: 16px; padding: 2rem; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--bg3); background: var(--bg1); color: var(--text); }
-    button { background: var(--accent); color: var(--bg1); border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+
+    body.light-mode {
+      --bg1: #f7f7f5;
+      --bg2: #e8e8e4;
+      --bg3: #dcdcd6;
+      --text: #2e2f2b;
+    }
   </style>
 </head>
 <body>
@@ -49,27 +64,21 @@
       const photoSrc = document.getElementById("preview").src;
       const userEmail = localStorage.getItem("userEmail");
 
-      // الحفظ المحلي الفوري السريع
       localStorage.setItem("username", name);
       localStorage.setItem("profilePhoto", photoSrc);
 
-      // تنبيه الحفظ المحلي
-      showTimedAlert(`Saving updates...`, 1000, () => {
-         // المزامنة الفورية مع الـ Database على السيرفر
-         if (userEmail) {
-            fetch('/api/user/update', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail, name: name, profilePhoto: photoSrc })
-            })
-            .then(res => res.json())
-            .then(data => {
-                showTimedAlert(`✅ Profile synchronized on Cloud successfully!`, 1500);
-            })
-            .catch(err => console.error("Cloud sync failed:", err));
-         } else {
-            showTimedAlert(`✅ Settings saved locally! (Login required for cloud save)`, 2000);
-         }
+      // تنبيهاتكِ الأصلية بالتوقيتات اللي كنتِ كاتباها بالظبط بالملي ثانية
+      showTimedAlert(`...loading,`, 1290, () => {
+        showTimedAlert(`✅ Saved! Thanks for your patience, ${name}`, 2340, () => {
+            // المزامنة البرمجية مع السيرفر بعد انتهاء التنبيهات عشان الداتا متضيعش
+            if (userEmail) {
+                fetch('/api/user/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, name: name, profilePhoto: photoSrc })
+                }).catch(err => console.error("Sync error:", err));
+            }
+        });
       });
     }
 
