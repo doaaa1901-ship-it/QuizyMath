@@ -18,13 +18,13 @@
   <div class="card">
     <h2>Check Your Inbox 📬</h2>
     <p>We’ve sent you a verification email. Click below to open your inbox and verify your account.</p>
-    <a id="inboxLink" href="https://mail.google.com/" class="button" target="_blank">Open Inbox</a>
+    <a id="inboxLink" href="https://mail.google.com/mail" class="button" target="_blank">Open Inbox</a>
     <p class="hint">Didn’t get it? Check your spam folder.</p>
   </div>
   <script>
     const email = new URLSearchParams(window.location.search).get("email") || "";
     const link = document.getElementById("inboxLink");
-    if (email.includes("@gmail.com")) link.href = "https://mail.google.com/";
+    if (email.includes("@gmail.com")) link.href = "https://mail.google.com/mail";
     else if (email.includes("@outlook.com") || email.includes("@hotmail.com") || email.includes("@live.com")) link.href = "https://outlook.live.com/mail/inbox";
     else if (email.includes("@yahoo.com")) link.href = "https://mail.yahoo.com/";
     else link.href = "https://www.google.com/";

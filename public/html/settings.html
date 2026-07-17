@@ -27,16 +27,262 @@
       --bg2: #e8e8e4;
       --bg3: #dcdcd6;
       --text: #2e2f2b;
+      --accent: #4aa87f;
+      --btn-bg: #d9d9d3;
+      --btn-bg-hover: #cbcbc4;
     }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, var(--bg1), var(--bg2), var(--bg3));
+      background-size: 300% 300%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      transition: background 0.8s, color 0.5s;
+    }
+
+    .settings-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .settings-card h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .settings-card label {
+      display: block;
+      text-align: left;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+
+    .settings-card input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.25s;
+    }
+
+    .settings-card input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(110,231,183,0.15);
+    }
+
+    .settings-card #photoUrlInput {
+      margin-top: 10px;
+    }
+
+    #galleryBtn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: var(--btn-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    #galleryBtn:hover {
+      background: var(--btn-bg-hover);
+      transform: translateY(-2px);
+    }
+
+    #galleryBtn:active {
+      transform: translateY(0);
+    }
+
+    .settings-card button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: none;
+      border-radius: 15px;
+      background: var(--accent);
+      color: #1a1f1e;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .settings-card button:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(110,231,183,0.3);
+    }
+
+    #preview {
+      border: 3px solid var(--accent);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    #customAlert {
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      min-width: 240px;
+    }
+
+    #customAlert p {
+      color: var(--text);
+      margin: 0;
+    }
+
+    #alertOkBtn {
+      background: var(--accent);
+      color: #1a1f1e;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 22px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    #alertOkBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #alertOkBtn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    /* ===== Side Slide Panel (edge tab) ===== */
+    .side-tab {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--accent);
+      color: #1a1f1e;
+      padding: 18px 8px;
+      border-radius: 0 14px 14px 0;
+      cursor: pointer;
+      z-index: 1002;
+      font-size: 1.3rem;
+      box-shadow: 3px 0 14px rgba(0,0,0,0.35);
+      transition: padding 0.25s ease, box-shadow 0.25s ease;
+      user-select: none;
+    }
+    .side-tab:hover {
+      padding-left: 16px;
+      box-shadow: 4px 0 18px rgba(110,231,183,0.4);
+    }
+
+    .side-panel {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      width: 240px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 6px 0 30px rgba(0,0,0,0.35);
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1001;
+      padding: 70px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .side-panel.open { transform: translateX(0); }
+
+    .side-panel h3 {
+      margin: 0 0 8px 0;
+      color: var(--accent);
+      font-size: 1.05rem;
+      text-align: center;
+    }
+
+    .panel-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--btn-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.25s;
+      box-sizing: border-box;
+    }
+    .panel-btn:hover {
+      background: var(--btn-bg-hover);
+      transform: translateX(4px);
+    }
+
+    .side-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    .side-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* ===== end side panel ===== */
   </style>
 </head>
 <body>
+
+  <!-- Side slide-out panel (edge tab) -->
+  <div class="side-overlay" id="sideOverlay" onclick="toggleSidePanel()"></div>
+  <div class="side-tab" id="sideTab" onclick="toggleSidePanel()">☰</div>
+  <div class="side-panel" id="sidePanel">
+    <h3>📌 Menu</h3>
+    <a class="panel-btn" href="startpage.html">🏠 Main Page</a>
+    <!-- Add more buttons/links below this line as needed, e.g.: -->
+    <!-- <a class="panel-btn" href="about.html">ℹ️ About</a> -->
+  </div>
 
   <div class="settings-card">
     <h2>⚙️ Profile Settings</h2>
     <div style="text-align: center; margin: 15px 0;">
       <img id="preview" src="/images/default-profile.png" style="width:100px; height:100px; border-radius:50%; object-fit:cover;" /><br>
       <input type="text" id="photoUrlInput" placeholder="Paste Image URL here" />
+      <input type="file" id="galleryInput" accept="image/*" style="display:none;">
+      <button type="button" id="galleryBtn" onclick="document.getElementById('galleryInput').click()">🖼️ Choose from Gallery</button>
     </div>
     <label>Full Name:</label>
     <input type="text" id="nameInput" placeholder="Enter your name" />
@@ -49,6 +295,11 @@
   </div>
 
   <script>
+    function toggleSidePanel() {
+      document.getElementById('sidePanel').classList.toggle('open');
+      document.getElementById('sideOverlay').classList.toggle('show');
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("nameInput").value = localStorage.getItem("username") || "";
       document.getElementById("preview").src = localStorage.getItem("profilePhoto") || "/images/default-profile.png";
@@ -57,6 +308,35 @@
 
     document.getElementById("photoUrlInput").addEventListener("input", function() {
       if(this.value.trim() !== "") document.getElementById("preview").src = this.value;
+    });
+
+    document.getElementById("galleryInput").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        showTimedAlert("⚠️ Please choose an image file.", 800);
+        this.value = "";
+        return;
+      }
+
+      const maxSizeMB = 5;
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        showTimedAlert(`⚠️ Image too large (max ${maxSizeMB}MB).`, 800);
+        this.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById("preview").src = evt.target.result;
+        // Clear the URL field since we now have a local file selected
+        document.getElementById("photoUrlInput").value = "";
+      };
+      reader.onerror = function() {
+        showTimedAlert("⚠️ Couldn't read that image, try another.", 800);
+      };
+      reader.readAsDataURL(file);
     });
 
     function saveSettings() {
