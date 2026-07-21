@@ -12,7 +12,7 @@ exports.signup = async (req, res) => {
         
         const existingUser = await User.findOne({ email });
         if (existingUser && existingUser.isVerified) {
-            return res.status(400).json({ error: "هذا البريد الإلكتروني مسجل بالفعل" });
+            return res.status(400).json({ error:"مدخلات غير صحيحة" });
         }
         
         const hashedPassword = await bcrypt.hash(password, 10);
