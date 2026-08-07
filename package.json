@@ -11,5 +11,14 @@
     "mongodb": "^7.3.0",
     "mongoose": "^8.19.1",
     "nodemailer": "^7.0.13"
-  }
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
+  },
+"scripts": {
+  "test":          "jest",
+  "test:watch":    "jest --watch",
+  "test:coverage": "jest --coverage"
+}
 }
