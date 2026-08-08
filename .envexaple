@@ -1,0 +1,7 @@
+# Environment variables
+
+```dotenv
+email=usernum@gmail.com
+EMAIL_PASS=-------------
+MONGO_URI=mongodb+srv://user:@cluster0.fjm7wbb.mongodb.net/quizymath?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=--------
