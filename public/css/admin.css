@@ -1,0 +1,281 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: linear-gradient(to right, #132f25, #4b6056);
+  min-height: 100vh;
+  color: #e9efe9;
+}
+
+/* ---------- Login ---------- */
+.admin-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 380px;
+  background-color: #2a493b;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.admin-title {
+  text-align: center;
+  margin-bottom: 0.4rem;
+}
+
+.admin-subtitle {
+  text-align: center;
+  color: #b7c4bd;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-login-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-login-card input {
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #4b6056;
+  background: #1d382c;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.admin-login-card button {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: #3fae6b;
+  color: #0d1f17;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-login-card button:hover {
+  background: #56c983;
+}
+
+.admin-msg {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
+.admin-msg-error {
+  color: #ff8a8a;
+}
+
+/* ---------- Dashboard shell ---------- */
+.admin-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-welcome {
+  display: block;
+  color: #b7c4bd;
+  font-size: 0.85rem;
+}
+
+.admin-logout-btn {
+  background: transparent;
+  border: 1px solid #6a8a79;
+  color: #e9efe9;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Stats ---------- */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-stat-card {
+  background: #2a493b;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.admin-stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #56c983;
+}
+
+.admin-stat-label {
+  font-size: 0.8rem;
+  color: #b7c4bd;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Tabs ---------- */
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-tab-btn {
+  background: transparent;
+  border: 1px solid #4b6056;
+  color: #e9efe9;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-tab-btn.active {
+  background: #3fae6b;
+  color: #0d1f17;
+  border-color: #3fae6b;
+  font-weight: 700;
+}
+
+/* ---------- Tables ---------- */
+.admin-table-wrap {
+  overflow-x: auto;
+  background: #1d382c;
+  border-radius: 12px;
+  padding: 0.5rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.admin-table th {
+  color: #9fd6b6;
+  font-weight: 600;
+}
+
+.admin-loading {
+  text-align: center;
+  color: #b7c4bd;
+  white-space: normal;
+}
+
+.admin-badge {
+  background: #4b6056;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.admin-badge-admin {
+  background: #3fae6b;
+  color: #0d1f17;
+  font-weight: 700;
+}
+
+.admin-view-btn {
+  background: transparent;
+  border: 1px solid #6a8a79;
+  color: #e9efe9;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-view-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-ua {
+  max-width: 260px;
+  white-space: normal;
+  word-break: break-word;
+  color: #b7c4bd;
+  font-size: 0.8rem;
+}
+
+/* ---------- Modal ---------- */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3vh 1rem;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.admin-modal {
+  position: relative;
+  background: #2a493b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 640px;
+  width: 100%;
+}
+
+.admin-modal h2 {
+  margin-bottom: 0.2rem;
+}
+
+.admin-modal h3 {
+  margin: 1rem 0 0.5rem;
+  color: #9fd6b6;
+  font-size: 1rem;
+}
+
+.admin-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  color: #e9efe9;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.admin-table-sm th,
+.admin-table-sm td {
+  white-space: normal;
+}

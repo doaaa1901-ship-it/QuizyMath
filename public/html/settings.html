@@ -343,6 +343,7 @@
       const name = document.getElementById("nameInput").value || "Guest";
       const photoSrc = document.getElementById("preview").src;
       const userEmail = localStorage.getItem("userEmail");
+      const token = localStorage.getItem("token");
 
       localStorage.setItem("username", name);
       localStorage.setItem("profilePhoto", photoSrc);
@@ -351,11 +352,14 @@
       showTimedAlert(`...loading,`, 1290, () => {
         showTimedAlert(`✅ Saved! Thanks for your patience, ${name}`, 2340, () => {
             // المزامنة البرمجية مع السيرفر بعد انتهاء التنبيهات عشان الداتا متضيعش
-            if (userEmail) {
+            if (userEmail && token) {
                 fetch('/api/user/update', {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail, name: name, profilePhoto: photoSrc })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: name, profilePhoto: photoSrc })
                 }).catch(err => console.error("Sync error:", err));
             }
         });

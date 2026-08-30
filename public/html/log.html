@@ -113,6 +113,8 @@
         localStorage.setItem("userEmail", data.user.email);
         localStorage.setItem("username", data.user.name);
         localStorage.setItem("profilePhoto", data.user.profilePhoto || 'images/default-profile.png');
+        // التوكن ده هو اللي بيثبت هويتك للسيرفر دلوقتي بدل ما نبعت الإيميل صراحةً
+        localStorage.setItem("token", data.token);
 
         Swal.fire({
           icon: "success",

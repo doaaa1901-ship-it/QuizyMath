@@ -32,8 +32,19 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: "هذا الحساب لم يتم تفعيله بعد، يرجى تفعيل الحساب أولاً" });
     }
 
+    // تسجيل تفاصيل عملية الدخول دي (تظهر بعدين في لوحة الأدمن)
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    user.lastLoginAt = new Date();
+    user.lastLoginIP = ip;
+    user.loginHistory = user.loginHistory || [];
+    user.loginHistory.unshift({ date: user.lastLoginAt, ip, userAgent });
+    user.loginHistory = user.loginHistory.slice(0, 10); // نحتفظ بآخر 10 عمليات دخول بس
+    await user.save();
+
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: '7d' }
     );
@@ -45,7 +56,8 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        profilePhoto: user.profilePhoto
+        profilePhoto: user.profilePhoto,
+        role: user.role
       }
     });
   } catch (err) {

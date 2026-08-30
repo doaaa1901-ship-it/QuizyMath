@@ -372,9 +372,14 @@ async function endQuiz() {
   localStorage.setItem("history", JSON.stringify(past));
 
   try {
+      // لو المستخدم مسجل دخول، النتيجة بتترتبط بحسابه، غير كده بتتحفظ كـ guest
+      const token = localStorage.getItem("token");
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       await fetch('/api/scores', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
               scoreText: finalScoreText,
               difficulty: difficulty.toUpperCase()

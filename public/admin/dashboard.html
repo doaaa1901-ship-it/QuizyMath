@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuizyMath - Admin Dashboard</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <h1>🧮 QuizyMath Admin</h1>
+        <span id="adminWelcome" class="admin-welcome"></span>
+      </div>
+      <button id="logoutBtn" class="admin-logout-btn">Log out</button>
+    </header>
+
+    <section class="admin-stats" id="statsRow"></section>
+
+    <nav class="admin-tabs">
+      <button class="admin-tab-btn active" data-tab="users">Users</button>
+      <button class="admin-tab-btn" data-tab="scores">All Scores</button>
+    </nav>
+
+    <section id="usersTab" class="admin-tab-panel">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Verified</th>
+              <th>Joined</th>
+              <th>Last Login</th>
+              <th>Last Login IP</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="8" class="admin-loading">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="scoresTab" class="admin-tab-panel" style="display:none;">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Score</th>
+              <th>Difficulty</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="scoresTableBody">
+            <tr><td colspan="4" class="admin-loading">Loading scores...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal: user detail -->
+  <div id="userModalOverlay" class="admin-modal-overlay" style="display:none;">
+    <div class="admin-modal">
+      <button id="closeModalBtn" class="admin-modal-close">✕</button>
+      <div id="userModalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_API_BASE = "__ADMIN_API_BASE__";
+    const ADMIN_PANEL_BASE = "__ADMIN_PANEL_BASE__";
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+      window.location.href = ADMIN_PANEL_BASE;
+    }
+
+    document.getElementById("adminWelcome").textContent =
+      "Signed in as " + (localStorage.getItem("adminName") || "admin");
+
+    async function adminFetch(path) {
+      const res = await fetch(`${ADMIN_API_BASE}${path}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("adminToken");
+        window.location.href = ADMIN_PANEL_BASE;
+        throw new Error("Not authorized");
+      }
+      if (!res.ok) throw new Error("Request failed");
+      return res.json();
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function fmtDate(d) {
+      if (!d) return "—";
+      return new Date(d).toLocaleString();
+    }
+
+    async function loadStats() {
+      const stats = await adminFetch("/stats");
+      const row = document.getElementById("statsRow");
+      const cards = [
+        { label: "Total Users", value: stats.totalUsers },
+        { label: "Verified", value: stats.verifiedUsers },
+        { label: "Admins", value: stats.adminCount },
+        { label: "Quizzes Taken", value: stats.totalScores }
+      ];
+      row.innerHTML = cards.map(c => `
+        <div class="admin-stat-card">
+          <div class="admin-stat-value">${c.value}</div>
+          <div class="admin-stat-label">${c.label}</div>
+        </div>
+      `).join("");
+    }
+
+    async function loadUsers() {
+      const users = await adminFetch("/users");
+      const body = document.getElementById("usersTableBody");
+      if (!users.length) {
+        body.innerHTML = `<tr><td colspan="8" class="admin-loading">No users yet.</td></tr>`;
+        return;
+      }
+      body.innerHTML = users.map(u => `
+        <tr>
+          <td>${escapeHtml(u.name)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td><span class="admin-badge ${u.role === 'admin' ? 'admin-badge-admin' : ''}">${escapeHtml(u.role)}</span></td>
+          <td>${u.isVerified ? '✅' : '❌'}</td>
+          <td>${fmtDate(u.createdAt)}</td>
+          <td>${fmtDate(u.lastLoginAt)}</td>
+          <td>${escapeHtml(u.lastLoginIP || '—')}</td>
+          <td><button class="admin-view-btn" data-id="${u._id}">View</button></td>
+        </tr>
+      `).join("");
+
+      body.querySelectorAll(".admin-view-btn").forEach(btn => {
+        btn.addEventListener("click", () => openUserDetail(btn.dataset.id));
+      });
+    }
+
+    async function loadScores() {
+      const scores = await adminFetch("/scores");
+      const body = document.getElementById("scoresTableBody");
+      if (!scores.length) {
+        body.innerHTML = `<tr><td colspan="4" class="admin-loading">No scores yet.</td></tr>`;
+        return;
+      }
+      body.innerHTML = scores.map(s => `
+        <tr>
+          <td>${escapeHtml(s.email)}</td>
+          <td>${escapeHtml(s.scoreText)}</td>
+          <td>${escapeHtml(s.difficulty)}</td>
+          <td>${fmtDate(s.createdAt)}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function openUserDetail(id) {
+      const { user, scores } = await adminFetch(`/users/${id}`);
+      const overlay = document.getElementById("userModalOverlay");
+      const content = document.getElementById("userModalContent");
+
+      const historyRows = (user.loginHistory || []).map(h => `
+        <tr>
+          <td>${fmtDate(h.date)}</td>
+          <td>${escapeHtml(h.ip)}</td>
+          <td class="admin-ua">${escapeHtml(h.userAgent)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="3" class="admin-loading">No login history yet.</td></tr>`;
+
+      const scoreRows = scores.map(s => `
+        <tr>
+          <td>${escapeHtml(s.scoreText)}</td>
+          <td>${escapeHtml(s.difficulty)}</td>
+          <td>${fmtDate(s.createdAt)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="3" class="admin-loading">No quiz results yet.</td></tr>`;
+
+      content.innerHTML = `
+        <h2>${escapeHtml(user.name)}</h2>
+        <p class="admin-subtitle">${escapeHtml(user.email)} · role: ${escapeHtml(user.role)}</p>
+
+        <h3>Login history</h3>
+        <table class="admin-table admin-table-sm">
+          <thead><tr><th>Date</th><th>IP</th><th>Device</th></tr></thead>
+          <tbody>${historyRows}</tbody>
+        </table>
+
+        <h3>Quiz results</h3>
+        <table class="admin-table admin-table-sm">
+          <thead><tr><th>Score</th><th>Difficulty</th><th>Date</th></tr></thead>
+          <tbody>${scoreRows}</tbody>
+        </table>
+      `;
+      overlay.style.display = "flex";
+    }
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("userModalOverlay").style.display = "none";
+    });
+    document.getElementById("userModalOverlay").addEventListener("click", (e) => {
+      if (e.target.id === "userModalOverlay") e.target.style.display = "none";
+    });
+
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".admin-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const tab = btn.dataset.tab;
+        document.getElementById("usersTab").style.display = tab === "users" ? "block" : "none";
+        document.getElementById("scoresTab").style.display = tab === "scores" ? "block" : "none";
+      });
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminName");
+      window.location.href = ADMIN_PANEL_BASE;
+    });
+
+    loadStats().catch(console.error);
+    loadUsers().catch(console.error);
+    loadScores().catch(console.error);
+  </script>
+</body>
+</html>

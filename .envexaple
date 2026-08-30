@@ -5,3 +5,8 @@ email=usernum@gmail.com
 EMAIL_PASS=-------------
 MONGO_URI=mongodb+srv://user:@cluster0.fjm7wbb.mongodb.net/quizymath?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=--------
+# رابط لوحة الأدمن مش بيبقى /admin عشان محدش يلاقيه بالتخمين.
+# غيّري القيمة دي بحاجة عشوائية طويلة بتاعتك (32+ حرف)، ونفس القيمة دي هتبقى جزء من رابط اللوحة:
+# مثال: https://yoursite.com/panel-<ADMIN_URL_SECRET>
+# لتوليد واحدة عشوائية شغّلي: node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
+ADMIN_URL_SECRET=REPLACE_WITH_LONG_RANDOM_STRING
